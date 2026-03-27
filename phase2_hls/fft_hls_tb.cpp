@@ -3,8 +3,8 @@
 #include <cmath>
 
 int main() {
-    complex_fixed_t in[FFT_LENGTH];
-    complex_fixed_t out[FFT_LENGTH];
+    hls::stream<axis_t> in_stream("in_stream");
+    hls::stream<axis_t> out_stream("out_stream");
     
     // Generate test signal: sum of 2 sine waves
     for (int i = 0; i < FFT_LENGTH; i++) {
@@ -12,11 +12,26 @@ int main() {
         float bin2 = 50.0;
         float val = std::sin(2.0 * M_PI * bin1 * i / FFT_LENGTH) + 
                     0.5 * std::sin(2.0 * M_PI * bin2 * i / FFT_LENGTH);
-        in[i] = complex_fixed_t(data_t(val), data_t(0.0));
+        
+        axis_t in_val;
+        in_val.data = complex_fixed_t(data_t(val), data_t(0.0));
+        in_val.last = (i == FFT_LENGTH - 1) ? 1 : 0;
+        in_stream.write(in_val);
     }
     
     // Run the top-level HLS function
-    fft_top(in, out);
+    fft_top(in_stream, out_stream);
+    
+    // Read results from stream
+    complex_fixed_t out[FFT_LENGTH];
+    bool last_signal_correct = false;
+    for (int i = 0; i < FFT_LENGTH; i++) {
+        axis_t out_val = out_stream.read();
+        out[i] = out_val.data;
+        if (i == FFT_LENGTH - 1 && out_val.last == 1) {
+            last_signal_correct = true;
+        }
+    }
     
     // Check results
     std::cout << "--- HLS C-Simulation (Fixed-Point) ---" << std::endl;
@@ -26,9 +41,10 @@ int main() {
     
     std::cout << "Bin 10 Magnitude: " << mag10 << " (Expected ~512)" << std::endl;
     std::cout << "Bin 50 Magnitude: " << mag50 << " (Expected ~256)" << std::endl;
+    std::cout << "TLAST Signal correctly asserted: " << (last_signal_correct ? "YES" : "NO") << std::endl;
     
     // Simple check on the complex magnitudes
-    if (mag10 > 500 && mag50 > 250) {
+    if (mag10 > 500 && mag50 > 250 && last_signal_correct) {
         std::cout << "C-SIM TEST PASSED" << std::endl;
         return 0;
     } else {

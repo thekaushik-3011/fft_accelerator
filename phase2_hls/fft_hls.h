@@ -3,8 +3,15 @@
 
 #include "../phase1_baseline/fft_fixed.h"
 
+#include <hls_stream.h>
+
+// Define AXI-Stream payload
+struct axis_t {
+    complex_fixed_t data;
+    bool last;
+};
+
 // Top-level function wrapper for HLS synthesis.
-// We use AXI4-Stream interfaces for the in and out arrays.
-void fft_top(complex_fixed_t in[FFT_LENGTH], complex_fixed_t out[FFT_LENGTH]);
+void fft_top(hls::stream<axis_t>& in, hls::stream<axis_t>& out);
 
 #endif

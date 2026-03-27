@@ -1,0 +1,38 @@
+# Compiled binaries and object files
+*.o
+*.d
+*.exe
+fft_tb
+fft_fixed_tb
+
+# Vitis HLS workspace and generated project files
+workspace/
+hls_fft_project/
+*.log
+*.jou
+
+# Vitis/Vivado generated directories
+.Xil/
+*.ip_user_files/
+*.cache/
+*.hw/
+*.runs/
+*.srcs/
+*.gen/
+*.sim/
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Temporary helper scripts (not part of the project)
+read_docx.py
+extracted_docx.txt
+HLS_Project_Submission.docx

@@ -5,11 +5,12 @@
 
 #include <hls_stream.h>
 
-// Define AXI-Stream payload
-struct axis_t {
-    complex_fixed_t data;
-    bool last;
-};
+#include <ap_int.h>
+
+#include "ap_axi_sdata.h"
+
+// Define AXI-Stream payload using native perfectly aligned Xilinx struct
+typedef ap_axiu<64, 0, 0, 0> axis_t;
 
 // Top-level function wrapper for HLS synthesis.
 void fft_top(hls::stream<axis_t>& in, hls::stream<axis_t>& out);

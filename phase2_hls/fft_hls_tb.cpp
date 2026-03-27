@@ -13,8 +13,17 @@ int main() {
         float val = std::sin(2.0 * M_PI * bin1 * i / FFT_LENGTH) + 
                     0.5 * std::sin(2.0 * M_PI * bin2 * i / FFT_LENGTH);
         
+        ap_uint<32> real_raw = data_t(val).range();
+        ap_uint<32> imag_raw = data_t(0.0).range();
+        
+        ap_uint<64> packed_data;
+        packed_data.range(31,0) = real_raw;
+        packed_data.range(63,32) = imag_raw;
+        
         axis_t in_val;
-        in_val.data = complex_fixed_t(data_t(val), data_t(0.0));
+        in_val.data = packed_data;
+        in_val.keep = -1;
+        in_val.strb = -1;
         in_val.last = (i == FFT_LENGTH - 1) ? 1 : 0;
         in_stream.write(in_val);
     }
@@ -27,7 +36,13 @@ int main() {
     bool last_signal_correct = false;
     for (int i = 0; i < FFT_LENGTH; i++) {
         axis_t out_val = out_stream.read();
-        out[i] = out_val.data;
+        ap_uint<32> real_raw = out_val.data.range(31,0);
+        ap_uint<32> imag_raw = out_val.data.range(63,32);
+        
+        data_t real_val; real_val.range() = real_raw;
+        data_t imag_val; imag_val.range() = imag_raw;
+        
+        out[i] = complex_fixed_t(real_val, imag_val);
         if (i == FFT_LENGTH - 1 && out_val.last == 1) {
             last_signal_correct = true;
         }

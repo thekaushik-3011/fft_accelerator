@@ -20,6 +20,7 @@ hls_fft_project/
 *.srcs/
 *.gen/
 *.sim/
+fft_accelerator/
 
 # OS / Editor artifacts
 .DS_Store

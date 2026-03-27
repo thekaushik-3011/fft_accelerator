@@ -16,7 +16,14 @@ void fft_top(hls::stream<axis_t>& in, hls::stream<axis_t>& out) {
 
     read_in: for (int i = 0; i < FFT_LENGTH; i++) {
         axis_t val = in.read();
-        x[i] = val.data;
+        
+        ap_uint<32> real_raw = val.data.range(31, 0);
+        ap_uint<32> imag_raw = val.data.range(63, 32);
+        
+        data_t real_val; real_val.range() = real_raw;
+        data_t imag_val; imag_val.range() = imag_raw;
+        
+        x[i] = complex_fixed_t(real_val, imag_val);
     }
     
     // Call the newly created optimized core function (with pragmas)
@@ -24,8 +31,18 @@ void fft_top(hls::stream<axis_t>& in, hls::stream<axis_t>& out) {
     
     write_out: for (int i = 0; i < FFT_LENGTH; i++) {
         axis_t val;
-        val.data = x[i];
-        val.last = (i == FFT_LENGTH - 1);
+        
+        ap_uint<32> real_raw = x[i].real().range();
+        ap_uint<32> imag_raw = x[i].imag().range();
+        
+        ap_uint<64> packed_data;
+        packed_data.range(31,0) = real_raw;
+        packed_data.range(63,32) = imag_raw;
+        
+        val.data = packed_data;
+        val.keep = -1; // All 8 bytes valid (64-bit complex)
+        val.strb = -1;
+        val.last = (i == FFT_LENGTH - 1) ? 1 : 0;
         out.write(val);
     }
 }

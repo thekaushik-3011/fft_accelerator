@@ -55,9 +55,9 @@ This project demonstrates the complete hardware-software co-design flow — from
 | **1. Naïve** | None | Sequential | 6 | 8 | 1,462 | 1,509 |
 | **2. Pipeline** | `pipeline II=1` | Failed (BRAM conflict) | 6 | 8 | 1,222 | 1,482 |
 | **3. Partition** | `pipeline` + `array_partition` | Failed (stride collision) | 12 | 8 | 1,206 | 2,191 |
-| **4. Dataflow** | `dataflow` + `unroll` + `pipeline` | **14,448 cycles** | **86** | 8 | 8,348 | 9,173 |
+| **4. SDF Dataflow** | `dataflow` + `bind_storage` | **3,085 cycles** | **32** | 72 | 15,129 | 9,725 |
 
-> **Key Insight:** Standard BRAM has only 2 ports, insufficient for a pipelined Radix-2 butterfly. Cyclic partitioning fails because the FFT stride doubles each stage, causing bank collisions. The dataflow architecture resolves this by instantiating 10 independent hardware stages with dedicated ping-pong buffers.
+> **Key Insight:** Standard `pipeline` and `array_partition` fail drastically on basic arrays due to FFT memory access stride collisions. We ultimately implemented a true **Single-path Delay Feedback (SDF) continuous pipeline**, dropping BRAM utilization immensely and increasing pipeline throughput down to just 3,085 cycles! Vitis maps the shift registers exactly to RAM, completely bypassing standard memory bottlenecks.
 
 ### Phase 3: Architecture Trade-Off Analysis
 Plotted a Pareto curve identifying **Dataflow** as the optimal solution for streaming contexts. Compared against the industry-standard **TI C6678 DSP**, the FPGA Dataflow engine achieves comparable latency but guarantees deterministic, continuous AXI-Stream processing with no CPU overhead.

@@ -1,10 +1,10 @@
 open_project hls_fft_project
 set_top fft_top
 add_files fft_hls.cpp
-add_files fft_hls_core_dataflow.cpp
+add_files fft_hls_core.cpp
 add_files -tb fft_hls_tb.cpp
 
-open_solution "solution2_pipeline"
+open_solution "solution4_sdf"
 set_part {xc7z020clg400-1}
 create_clock -period 10 -name default
 

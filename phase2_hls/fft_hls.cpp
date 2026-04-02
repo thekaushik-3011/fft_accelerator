@@ -1,5 +1,6 @@
 #include "fft_hls.h"
-#include "twiddles.h" // Precomputed ROM for twiddle factors
+#include "twiddles.h"      // Precomputed ROM for twiddle factors
+#include "fft_hls_core.cpp" // SDF pipeline stages — included directly to guarantee visibility
 
 // Input mapper: formats AXI Stream into strictly math stream
 void input_stage(hls::stream<axis_t>& axis_in, hls::stream<complex_fixed_t>& sdf_in) {

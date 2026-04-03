@@ -14,7 +14,7 @@ void sdf_stage(hls::stream<complex_fixed_t>& in, hls::stream<complex_fixed_t>& o
     #pragma HLS bind_storage variable=sr type=ram_2p
     #pragma HLS dependence variable=sr type=inter false
 
-    for (int c = 0; c < 2 * FFT_LENGTH; c++) {
+    for (int c = 0; c < 2 * FFT_LENGTH - 1; c++) {
         #pragma HLS pipeline II=1
         complex_fixed_t val_in = in.read();
         

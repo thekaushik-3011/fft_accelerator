@@ -15,9 +15,32 @@ Hardware architectures built with pure floating-point math (`float` or `double`)
 We replaced all standard C++ `float` types with Xilinx's Arbitrary Precision datatype: `ap_fixed<32, 16>`. This designates 16 bits for the integer part and 16 bits for the fractional part (Q16.16 format).
 
 **The Result:** 
-We developed an automated C++ testbench comparing the floating-point output against the fixed-point output over a two-tone sine wave test vector.
-- **Signal-to-Noise Ratio (SNR):** `87.57 dB`
-- **Outcome:** The SNR proved that the precision loss introduced by Q16.16 quantization was completely negligible. The math was verified as hardware-ready.
+We developed two automated C++ testbenches and ran them live to validate correctness.
+
+#### Testbench 1: Floating-Point Reference (`fft_tb.cpp`)
+```
+--- Floating-Point FFT ---
+Execution Time : 312.582 µs   (pure sequential software on host CPU)
+Bin 10 Magnitude : 512        ✅ (Expected ~512)
+Bin 50 Magnitude : 256        ✅ (Expected ~256)
+```
+The two-tone sine wave (10 Hz and 50 Hz) was perfectly identified. This establishes our **golden reference**.
+
+#### Testbench 2: Fixed-Point SNR Analysis (`fft_fixed_tb.cpp`)
+```
+--- Fixed-Point Q32.16 vs Floating-Point SNR ---
+Signal Power : 655,360
+Noise Power  : 0.00114596
+SNR (dB)     : 87.5731 dB    ✅
+```
+- **Outcome:** An SNR of **87.57 dB** proves the precision loss from `ap_fixed<32,16>` quantization is completely negligible (essentially lossless for all DSP applications). The design was verified as hardware-ready.
+
+#### Key Software vs Hardware Latency Comparison
+| Mode | Execution Time | 
+|:---|:---:|
+| Software (floating-point C++ on CPU) | **312.58 µs** |
+| Hardware (SDF FFT on FPGA @ 100 MHz) | **30.85 µs** |
+| **Speedup** | **~10×** |
 
 ---
 

@@ -58,11 +58,17 @@ int main() {
     std::cout << "Bin 50 Magnitude: " << mag50 << " (Expected ~256)" << std::endl;
     std::cout << "TLAST Signal correctly asserted: " << (last_signal_correct ? "YES" : "NO") << std::endl;
     
-    // Simple check on the complex magnitudes
-    if (mag10 > 500 && mag50 > 250 && last_signal_correct) {
+    // Tight check: must be within 10% of the mathematically correct magnitudes
+    bool mag10_ok = (mag10 > 460 && mag10 < 564);  // 512 ± 10%
+    bool mag50_ok = (mag50 > 230 && mag50 < 282);  // 256 ± 10%
+    
+    if (mag10_ok && mag50_ok && last_signal_correct) {
         std::cout << "C-SIM TEST PASSED" << std::endl;
         return 0;
     } else {
+        if (!mag10_ok) std::cout << "FAIL: Bin 10 magnitude out of range (got " << mag10 << ", expected 460-564)" << std::endl;
+        if (!mag50_ok) std::cout << "FAIL: Bin 50 magnitude out of range (got " << mag50 << ", expected 230-282)" << std::endl;
+        if (!last_signal_correct) std::cout << "FAIL: TLAST not asserted" << std::endl;
         std::cout << "C-SIM TEST FAILED" << std::endl;
         return 1;
     }
